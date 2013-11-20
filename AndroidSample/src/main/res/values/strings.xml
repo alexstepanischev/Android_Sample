@@ -6,6 +6,7 @@
     <string name="action_settings">Settings</string>
     <string name="edit_message">Enter a message</string>
     <string name="button_send">Send</string>
+    <string name="button_save1">Save</string>
     <string name="title_activity_next">NextActivity</string>
-
+    <string name="saved_message">saved_message</string>
 </resources>
