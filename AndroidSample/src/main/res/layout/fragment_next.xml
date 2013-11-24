@@ -73,6 +73,37 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/db_output_message" />
 
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/load_controls"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/db_output_message"
+        android:layout_alignParentLeft="true">
+
+        <EditText android:id="@+id/load_message_edit"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/load_message"
+            android:text="http://goo.gl/V0N5II" />
+
+        <Button
+            android:id="@+id/load_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/button_load" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/image_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/load_controls" />
+
 
 
 </RelativeLayout>

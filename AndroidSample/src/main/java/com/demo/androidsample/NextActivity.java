@@ -5,9 +5,15 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,7 +21,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class NextActivity extends ActionBarActivity {
 
@@ -60,6 +72,10 @@ public class NextActivity extends ActionBarActivity {
     public static class PlaceholderFragment extends Fragment {
 
         Button btn1;
+        Button btn2;
+        ImageView image;
+        EditText editText1;
+        EditText editText2;
 
         public PlaceholderFragment() {
         }
@@ -68,17 +84,19 @@ public class NextActivity extends ActionBarActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             final View rootView = inflater.inflate(R.layout.fragment_next, container, false);
-
+            image = (ImageView) rootView.findViewById(R.id.image_view);
             TextView text = (TextView) rootView.findViewById(R.id.print_message);
             text.setText(getArguments().getString(MainActivity.EXTRA_MESSAGE));
+
+
 
             btn1 = (Button) rootView.findViewById(R.id.save_message);
             btn1.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     //Getting message
-                    EditText editText = (EditText) rootView.findViewById(R.id.new_message);
-                    String message = editText.getText().toString();
+                    editText1 = (EditText) rootView.findViewById(R.id.new_message);
+                    String message = editText1.getText().toString();
 
                     //Saving message to Preferences
                     SharedPreferences preferences = getActivity().getPreferences(Context.MODE_PRIVATE);
@@ -153,8 +171,88 @@ public class NextActivity extends ActionBarActivity {
                 }
             });
 
+            btn2 = (Button) rootView.findViewById(R.id.load_message);
+            btn2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    editText1 = (EditText) rootView.findViewById(R.id.load_message_edit);
+                    String url = editText1.getText().toString();
+
+                    ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+                    NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+                    if (networkInfo != null && networkInfo.isConnected()) {
+                       new DownloadFile().execute(url);
+                    } else {
+                        TextView text = (TextView) view.findViewById(R.id.print_message);
+                        text.setText("No network connection available.");
+                    }
+                }
+            });
+
             return rootView;
         }
+
+        private class DownloadFile extends AsyncTask<String, Void, Bitmap> {
+            @Override
+            protected Bitmap doInBackground(String... urls) {
+
+                // params comes from the execute() call: params[0] is the url.
+                try {
+                    return downloadUrl(urls[0]);
+                } catch (IOException e) {
+                    Log.d("DEBUG", "Unable to retrieve IMAGE. URL may be invalid.");
+                    return null;
+                }
+            }
+
+            // Given a URL, establishes an HttpUrlConnection and retrieves
+            // the web page content as a InputStream, which it returns as
+            // a string.
+            private Bitmap downloadUrl(String myurl) throws IOException {
+                InputStream is = null;
+                // Only display the first 500 characters of the retrieved
+                // web page content.
+                int len = 500;
+
+                try {
+                    URL url = new URL(myurl);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setReadTimeout(10000 /* milliseconds */);
+                    conn.setConnectTimeout(15000 /* milliseconds */);
+                    conn.setRequestMethod("GET");
+                    conn.setDoInput(true);
+                    // Starts the query
+                    conn.connect();
+                    int response = conn.getResponseCode();
+                    Log.d("DEBUG", "The response is: " + response);
+                    is = conn.getInputStream();
+
+                    // Convert the InputStream into a bitmap
+                    Bitmap bitmap = BitmapFactory.decodeStream(is);
+                    return bitmap;
+
+                    // Makes sure that the InputStream is closed after the app is
+                    // finished using it.
+                } finally {
+                    if (is != null) {
+                        is.close();
+                    }
+                }
+            }
+
+            // onPostExecute displays the results of the AsyncTask.
+            @Override
+            protected void onPostExecute(Bitmap bitmap) {
+                if (bitmap != null) {
+                    image.setImageBitmap(bitmap);
+                }
+
+
+            }
+
+        }
     }
+
+
 
 }

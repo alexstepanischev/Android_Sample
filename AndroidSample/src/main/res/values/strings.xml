@@ -9,4 +9,6 @@
     <string name="button_save1">Save</string>
     <string name="title_activity_next">NextActivity</string>
     <string name="saved_message">saved_message</string>
+    <string name="button_load">Load</string>
+    <string name="load_message">Enter a link to picture</string>
 </resources>
